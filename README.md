@@ -176,5 +176,3 @@ This repository is relevant for:
 **Som Mudgil**
 ECE Undergraduate | Semiconductor Devices | TCAD | Photonics
 
-
-Just tell me.
