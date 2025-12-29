@@ -1,130 +1,180 @@
 
-# Heterojunction 1D Modeling using COMSOL Multiphysics
+# Semiconductor Device Modeling using COMSOL Multiphysics
 
-This repository contains a **1D semiconductor heterojunction device model** implemented in **COMSOL Multiphysics 6.2**, based on the official Semiconductor Module benchmark example.
+**Heterojunction 1D and Schottky Contact 2D Axisymmetric**
 
-The work focuses on **understanding carrier transport across heterojunction interfaces** and comparing two widely used physical formulations:
+This repository contains two semiconductor device models implemented using **COMSOL Multiphysics 6.2 (Semiconductor Module)**. The models focus on **interface-dominated carrier transport**, a key aspect of modern electronic and optoelectronic devices.
+
+The repository includes:
+
+* **1D Heterojunction device model** (GaAs / Al₀.₂₅Ga₀.₇₅As)
+* **2D Axisymmetric Schottky barrier diode model** (Tungsten / Silicon)
+
+Both models are based on **official COMSOL benchmark examples**, extended and carefully studied to understand **physical modeling choices, numerical stability, and result interpretation**.
+
+
+
+## 1. Heterojunction 1D Modeling
+
+### Overview
+
+The heterojunction model investigates **carrier transport across semiconductor–semiconductor interfaces** and compares two commonly used interface formulations:
 
 * **Continuous quasi-Fermi level model**
 * **Thermionic emission model**
 
-The study is motivated by device-level modeling needs in **semiconductor devices, optoelectronics, and photonics**, where interface physics plays a dominant role.
+The study highlights how **band offsets, doping configurations, and interface physics** affect current transport and energy band profiles.
 
 
 
-## Problem Overview
-Semiconductor **heterojunctions** occur when two dissimilar semiconductor materials are brought into contact, leading to:
+### Device Structure
 
-* Band discontinuities
-* Interface barriers
-* Carrier-selective transport mechanisms
-
-This repository simulates **GaAs / Al₀.₂₅Ga₀.₇₅As heterojunctions** under **forward and reverse bias**, capturing how:
-
-* Band alignment
-* Doping configuration
-* Interface modeling assumptions
-
-affect **I–V characteristics** and **energy band diagrams**.
+* Materials: **GaAs / Al₀.₂₅Ga₀.₇₅As**
+* Geometry: **1D planar heterojunction**
+* Bias conditions: **Forward and reverse bias**
+* Recombination: **Shockley–Read–Hall (SRH)** included in all domains
 
 
 
-## Heterojunction Configurations Studied
+### Heterojunction Configurations Studied
 
-Three heterojunction configurations are modeled:
+| Configuration | Junction Type | Dominant Carrier |
+| ------------- | ------------- | ---------------- |
+| n–n           | Isotype       | Electrons        |
+| p–n           | Anisotype     | Electrons        |
+| n–p           | Anisotype     | Holes            |
 
-| Configuration | Type      | Dominant Carrier |
-| ------------- | --------- | ---------------- |
-| n–n           | Isotype   | Electrons        |
-| p–n           | Anisotype | Electrons        |
-| n–p           | Anisotype | Holes            |
-
-Each configuration highlights how **band bending and barrier formation** determine whether electrons or holes dominate current transport.
+These configurations demonstrate that **carrier dominance is governed by band alignment**, not simply by doping type.
 
 
 
-## Physical Models Implemented
+### Interface Transport Models
 
-### 1️ Continuous Quasi-Fermi Level Model
+#### Continuous Quasi-Fermi Levels
 
-* Enforces continuity of electron and hole quasi-Fermi levels across the interface
+* Enforces continuity of electron and hole quasi-Fermi levels
 * Assumes ideal carrier transmission
-* Can slightly overestimate current when interface barriers are significant
+* Tends to overestimate current when interface barriers are significant
 
-**Best suited for:**
-Low-resistance interfaces or preliminary modeling
+#### Thermionic Emission
 
-
-
-### 2️ Thermionic Emission Model
-
-* Models carrier transport via **thermally activated emission over band offsets**
+* Models carrier transport via thermal emission over band discontinuities
 * Explicitly captures conduction-band and valence-band barriers
-* Shows excellent agreement with published reference data
-
-**Best suited for:**
-Realistic heterojunctions and device-grade simulations
-
-
-### 3️ Shockley–Read–Hall (SRH) Recombination
-
-* Included in all domains to model trap-assisted recombination
-* Influences carrier lifetime, leakage current, and I–V slope
-* Adds numerical stiffness, making solver configuration critical
+* Produces I–V curves in close agreement with literature
 
 
 
-## Key Results
+### Key Results
 
-* **Thermionic emission model** closely matches literature-reported I–V curves
-* Carrier dominance depends on **band alignment**, not just doping
-* Energy band diagrams clearly show:
-
-  * Conduction-band barriers → electron-dominated transport
-  * Valence-band barriers → hole-dominated transport
-* Proper solver strategies (scaling, continuation, equilibrium initialization) are essential for convergence
+* Clear distinction between electron- and hole-dominated transport
+* Energy band diagrams reveal the physical origin of current flow
+* Thermionic emission model better represents realistic heterojunction behavior
+* Solver continuation and equilibrium initialization are essential for convergence
 
 
 
-## Numerical Techniques Used
+## 2. Schottky Contact Modeling (2D Axisymmetric)
 
-To handle the highly nonlinear semiconductor equations:
+### Overview
 
-* Manual scaling of carrier density variables
-* Continuation (ramping) of doping and thermionic current
-* Reuse of equilibrium solutions as initial conditions
-* Tight solver tolerances for accurate current extraction
-
-These techniques are critical for **robust TCAD simulations**.
+The second model simulates an **ideal Schottky barrier diode**, consisting of a **tungsten metal contact deposited on n-type silicon**. The goal is to reproduce the **forward-bias J–V characteristics** and compare them with experimental data reported in literature.
 
 
 
+### Why 2D Axisymmetric?
+
+* The Schottky diode has **cylindrical symmetry**
+* 2D axisymmetric modeling captures **true 3D current spreading**
+* Achieves **3D-accurate results at significantly lower computational cost**
 
 
-## Reference
 
-K. Horio and H. Yanai,
-**“Numerical Modeling of Heterojunctions Including the Thermionic Emission Mechanism at the Heterojunction Interface,”**
-*IEEE Transactions on Electron Devices*, vol. 37, no. 4, pp. 1093–1098, 1990.
+### Device Structure
 
----
+* Metal: **Tungsten**
+* Semiconductor: **n-type Silicon (Nd = 1×10¹⁶ cm⁻³)**
+* Contact type: **Ideal Schottky**
+* Barrier height determined by:
+  [
+  Phi_B = Phi_m - chi_0
+  ]
+* Bias range: **0 – 0.25 V (forward bias)**
 
-##  Relevance & Applications
 
-This work is directly relevant to:
 
-* Semiconductor device modeling (TCAD)
-* Photonics and optoelectronics
-* Silicon photonics interface studies
-* III–V / CMOS integration
+### Importance of Integration Coupling
+
+A critical step in this model is the creation of an **integration coupling variable**:
+
+* Used to compute the **total current density across the Schottky contact**
+* Integrates the **normal component of current density** over the metal–semiconductor interface
+* Enables accurate extraction of **J–V characteristics**
+
+This step is essential because:
+
+* COMSOL solves **local current density**
+* Device characterization requires **global current**
+* Boundary integration converts flux into measurable device current
+
+For 2D axisymmetric models, special care is taken to **disable revolved-geometry integration when required**, ensuring correct physical scaling.
+
+
+
+### Numerical Strategy
+
+To ensure stable convergence of the nonlinear semiconductor equations:
+
+* Impurity concentration is **ramped gradually**
+* Equilibrium solution reused for biased simulations
+* Fine mesh applied near the **depletion region**
+* Continuation methods used for voltage sweep
+
+These techniques are critical for Schottky devices due to the **strong exponential dependence of current on barrier height**.
+
+
+
+### Key Results
+
+* Simulated **J–V curve closely matches experimental measurements**
+* Confirms dominance of **thermionic emission** in ideal Schottky contacts
+* Demonstrates correct barrier-controlled transport behavior
+
+
+
+## Numerical and Physical Insights Gained
+
+Across both models:
+
+* Small modeling choices (feature order, domain selection, solver continuation) strongly affect convergence
+* Interface physics dominates device behavior
+* Numerical stability depends on **physical consistency**, not solver force
+* Proper current extraction requires **integration coupling**, not point evaluation
+
+
+
+## References
+
+* K. Horio and H. Yanai, *IEEE Transactions on Electron Devices*, 1990
+* C. R. Crowell, J. C. Sarace, and S. M. Sze, *Trans. Metallurgical Society of AIME*, 1965
+
+
+
+## Relevance and Applications
+
+This repository is relevant for:
+
+* TCAD and semiconductor device modeling
+* Optoelectronic and photonic devices
+* Metal–semiconductor interfaces
 * Graduate-level device physics education
+* Research and industry-oriented COMSOL workflows
 
 
 
-## 📬 Author
+## Author
 
 **Som Mudgil**
-ECE Undergraduate | Device Modeling | Photonics | TCAD
+ECE Undergraduate | Semiconductor Devices | TCAD | Photonics
 
 
-
+Just tell me.
